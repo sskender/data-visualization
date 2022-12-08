@@ -84,7 +84,7 @@ d3.csv(DATA_PATH, function (data) {
   // Build color scale
   var myColor = d3
     .scaleSequential()
-    .interpolator(d3.interpolateInferno)
+    .interpolator(d3.interpolateRdBu)
     .domain([-5, 5]);
 
   function verticalRect(x, rectWidth) {
