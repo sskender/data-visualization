@@ -2,10 +2,14 @@
 var DATA_PATH = "data/heatmap_data.csv";
 var DATA_PCA_PATH = "data/pca_data.csv";
 
+// selects mapping
+
+var selectedCountry = "";
+
 // heatmap
 
 // set the dimensions and margins of the graph
-var margin1 = { top: 80, right: 25, bottom: 150, left: 250 },
+var margin1 = { top: 10, right: 50, bottom: 150, left: 250 },
   width1 = 850 - margin1.left - margin1.right,
   height1 = 550 - margin1.top - margin1.bottom;
 
@@ -21,9 +25,9 @@ var svg1 = d3
 // scatter
 
 // set the dimensions and margins of the graph
-var margin2 = { top: 10, right: 30, bottom: 30, left: 60 },
+var margin2 = { top: 10, right: 30, bottom: 100, left: 60 },
   width2 = 400 - margin2.left - margin2.right,
-  height2 = 400 - margin2.top - margin2.bottom;
+  height2 = 550 - margin2.top - margin2.bottom;
 
 // append the svg object to the body of the page
 var svg2 = d3
@@ -90,9 +94,6 @@ d3.csv(DATA_PATH, function (data) {
     .style("opacity", 0)
     .attr("class", "tooltip")
     .style("background-color", "white")
-    .style("border", "solid")
-    .style("border-width", "2px")
-    .style("border-radius", "5px")
     .style("padding", "5px");
 
   // Three function that change the tooltip when user hover / move / leave a cell
@@ -102,7 +103,7 @@ d3.csv(DATA_PATH, function (data) {
   };
   var mousemove = function (d) {
     tooltip
-      .html("The exact value of<br>this cell is: " + d.value)
+      .html(`The "${d.variable}" in ${d.group} is: ${d.value}`)
       .style("left", d3.mouse(this)[0] + 70 + "px")
       .style("top", d3.mouse(this)[1] + "px");
   };
@@ -125,6 +126,12 @@ d3.csv(DATA_PATH, function (data) {
     .attr("y", function (d) {
       return y1(d.variable);
     })
+    //.attr("class", function (d) {
+    //  return d.group;
+    //})
+    //.attr("class", function (d) {
+    //  return d.variable;
+    //})
     .attr("rx", 4)
     .attr("ry", 4)
     .attr("width", x1.bandwidth())
@@ -138,6 +145,12 @@ d3.csv(DATA_PATH, function (data) {
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave);
+
+  d3.select("#country").on("change", function (e) {
+    // TODO
+    const selectedCountry = d3.select("#country").property("value");
+    console.log(`drzava na heatmapu: ${selectedCountry}`);
+  });
 });
 
 // Read the scatter data
@@ -157,34 +170,37 @@ d3.csv(DATA_PCA_PATH, function (data) {
 
   // Add a tooltip div. Here I define the general feature of the tooltip: stuff that do not depend on the data point.
   // Its opacity is set to 0: we don't see it by default.
-  var tooltip = d3
+  var tooltip2 = d3
     .select("#scatterplot_dataviz")
     .append("div")
     .style("opacity", 0)
-    .attr("class", "tooltip")
+    .attr("class", "tooltip2")
     .style("background-color", "white")
-    .style("border", "solid")
-    .style("border-width", "1px")
-    .style("border-radius", "5px")
     .style("padding", "10px");
 
   // A function that change this tooltip when the user hover a point.
   // Its opacity is set to 1: we can now see it. Plus it set the text and position of tooltip depending on the datapoint (d)
   var mouseover = function (d) {
-    tooltip.style("opacity", 1);
+    const countryInput = d3.select("#country");
+    countryInput.property("value", d.Country);
+    //console.log(countryInput)
+    countryInput.on("change")();
+    tooltip2.style("opacity", 1);
   };
 
   var mousemove = function (d) {
-    console.log(d);
-    tooltip
-      .html("The exact value of<br>the Ground Living area is: " + d.Country)
+    tooltip2
+      .html("The selected country is: " + d.Country)
       .style("left", d3.mouse(this)[0] + 90 + "px") // It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
       .style("top", d3.mouse(this)[1] + "px");
   };
 
   // A function that change this tooltip when the leaves a point: just need to set opacity to 0 again
   var mouseleave = function (d) {
-    tooltip.transition().duration(200).style("opacity", 0);
+    const countryInput = d3.select("#country");
+    countryInput.property("value", "Australia");
+    countryInput.on("change")();
+    tooltip2.transition().duration(200).style("opacity", 0);
   };
 
   // Add dots
@@ -208,6 +224,9 @@ d3.csv(DATA_PCA_PATH, function (data) {
     .style("fill", "#69b3a2")
     .style("opacity", 0.3)
     .style("stroke", "white")
+    .attr("class", function (d) {
+      return d.Country;
+    })
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave);

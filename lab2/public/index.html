@@ -7,8 +7,15 @@
     <title>VIZPOD Lab 2</title>
 </head>
 <body>
-    <div id="heatmap_dataviz"></div>
-    <div id="scatterplot_dataviz"></div>
+    <input type="hidden" id="country" value="Australia">
+    <div class="inline" id="heatmap_dataviz"></div>
+    <div class="inline" id="scatterplot_dataviz"></div>
     <script type="text/javascript" src="js/vis.js"></script>
+    <style>
+        .inline { 
+            display: inline-block; 
+            margin:10px;
+        }
+    </style>
 </body>
 </html>
