@@ -85,7 +85,37 @@ d3.csv(DATA_PATH, function (data) {
   var myColor = d3
     .scaleSequential()
     .interpolator(d3.interpolateInferno)
-    .domain([1, 100]);
+    .domain([-5, 5]);
+
+  function verticalRect(x, rectWidth) {
+    svg1
+      .append("rect")
+      .style("stroke", "black")
+      .style("stroke-width", 2)
+      .style("fill", "none")
+      .attr("id", "rektokvir")
+      .attr("x", x)
+      .attr("y", 0)
+      .attr("height", height1)
+      .attr("width", rectWidth)
+      .attr("rx", 4)
+      .attr("ry", 4);
+  }
+
+  function horizontalRect(y, rectHeight) {
+    svg1
+      .append("rect")
+      .style("stroke", "black")
+      .style("stroke-width", 2)
+      .style("fill", "none")
+      .attr("id", "rektokvir")
+      .attr("x", 0)
+      .attr("y", y)
+      .attr("height", rectHeight)
+      .attr("width", width1)
+      .attr("rx", 4)
+      .attr("ry", 4);
+  }
 
   // create a tooltip
   var tooltip = d3
@@ -98,7 +128,16 @@ d3.csv(DATA_PATH, function (data) {
 
   // Three function that change the tooltip when user hover / move / leave a cell
   var mouseover = function (d) {
+    var x_coordinate = this.x.animVal.value;
+    var y_coordinate = this.y.animVal.value;
+    var height_of_rect = this.height.animVal.value;
+    var width_of_rect = this.width.animVal.value;
+
+    verticalRect(x_coordinate, width_of_rect);
+    horizontalRect(y_coordinate, height_of_rect);
+
     tooltip.style("opacity", 1);
+
     d3.select(this).style("stroke", "black").style("opacity", 1);
   };
   var mousemove = function (d) {
@@ -108,6 +147,7 @@ d3.csv(DATA_PATH, function (data) {
       .style("top", d3.mouse(this)[1] + "px");
   };
   var mouseleave = function (d) {
+    d3.selectAll("#rektokvir").remove();
     tooltip.style("opacity", 0);
     d3.select(this).style("stroke", "none").style("opacity", 0.8);
   };
