@@ -139,6 +139,10 @@ d3.csv(DATA_PATH, function (data) {
     tooltip.style("opacity", 1);
 
     d3.select(this).style("stroke", "black").style("opacity", 1);
+
+    // store country
+    var heatCountry = d3.select("#heat_country").property("value", d.group);
+    heatCountry.on("mouseover")();
   };
   var mousemove = function (d) {
     tooltip
@@ -150,6 +154,10 @@ d3.csv(DATA_PATH, function (data) {
     d3.selectAll("#rektokvir").remove();
     tooltip.style("opacity", 0);
     d3.select(this).style("stroke", "none").style("opacity", 0.8);
+
+    // clear country
+    var heatCountry = d3.select("#heat_country").property("value", "");
+    heatCountry.on("mouseleave")();
   };
 
   // add the squares
@@ -262,7 +270,7 @@ d3.csv(DATA_PCA_PATH, function (data) {
     })
     .attr("r", 7)
     .style("fill", "#69b3a2")
-    .style("opacity", 0.3)
+    .style("opacity", 1)
     .style("stroke", "white")
     .attr("class", function (d) {
       return d.Country;
@@ -270,4 +278,33 @@ d3.csv(DATA_PCA_PATH, function (data) {
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave);
+
+  d3.select("#heat_country").on("mouseover", function () {
+    var heatCountry = d3.select("#heat_country").property("value");
+    //console.log(heatCountry)
+
+    const [foundCountry] = data.filter((d) => d.Country == heatCountry);
+    //console.log(foundCountry)
+
+    pc1 = x2(foundCountry.PC1);
+    pc2 = y2(foundCountry.PC2);
+    //console.log(x2(d.PC1))
+    // console.log(pc1)
+
+    d3.select("#scatterplot_dataviz")
+      .selectAll("circle")
+      .filter(function () {
+        return d3.select(this).attr("cx") == pc1;
+      })
+      .style("stroke-width", 4)
+      .style("stroke", "black");
+  });
+
+  d3.select("#heat_country").on("mouseleave", function () {
+    // console.log("napustion sam");
+    d3.select("#scatterplot_dataviz")
+      .selectAll("circle")
+      .style("stroke-width", 0)
+      .style("stroke", "none");
+  });
 });
