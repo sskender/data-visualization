@@ -4,7 +4,14 @@ var DATA_PCA_PATH = "data/pca_data.csv";
 
 // selects mapping
 
+var lastVariableVisited = "";
+var colorsOfLastVisited = [];
+var lastColorsVisited = "";
 var selectedCountry = "";
+
+// global colors
+
+var myColor;
 
 // heatmap
 
@@ -82,7 +89,7 @@ d3.csv(DATA_PATH, function (data) {
     .remove();
 
   // Build color scale
-  var myColor = d3
+  myColor = d3
     .scaleSequential()
     .interpolator(d3.interpolateRdBu)
     .domain([-5, 5]);
@@ -140,9 +147,18 @@ d3.csv(DATA_PATH, function (data) {
 
     d3.select(this).style("stroke", "black").style("opacity", 1);
 
+    // store last variable in heatmap and colors of that variable
+    lastVariableVisited = d.variable;
+    colorsOfLastVisited = data.filter((alld) => alld.variable == d.variable);
+
     // store country
     var heatCountry = d3.select("#heat_country").property("value", d.group);
     heatCountry.on("mouseover")();
+
+    // TODO call event to update colors
+    //console.log(filteredRow)
+    //var colors = data.map(d=>console.log(d.color))
+    // console.log(lastVariableVisited);
   };
   var mousemove = function (d) {
     tooltip
@@ -196,8 +212,17 @@ d3.csv(DATA_PATH, function (data) {
 
   d3.select("#country").on("change", function (e) {
     // TODO
-    const selectedCountry = d3.select("#country").property("value");
-    console.log(`drzava na heatmapu: ${selectedCountry}`);
+    //const selectedCountry = d3.select("#country").property("value");
+    //console.log(`drzava na heatmapu: ${selectedCountry}`);
+    /*
+    var x_coordinate = this.x.animVal.value;
+    var y_coordinate = this.y.animVal.value;
+    var height_of_rect = this.height.animVal.value;
+    var width_of_rect = this.width.animVal.value;
+
+    verticalRect(x_coordinate, width_of_rect);
+    horizontalRect(y_coordinate, height_of_rect);
+    */
   });
 });
 
@@ -275,6 +300,9 @@ d3.csv(DATA_PCA_PATH, function (data) {
     .attr("class", function (d) {
       return d.Country;
     })
+    .attr("data-country", function (d) {
+      return d.Country;
+    })
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave);
@@ -298,6 +326,20 @@ d3.csv(DATA_PCA_PATH, function (data) {
       })
       .style("stroke-width", 4)
       .style("stroke", "black");
+
+    // color countries
+    colorsOfLastVisited.forEach((item) => {
+      const country = item.group;
+      const color = myColor(item.color);
+
+      d3.select("#scatterplot_dataviz")
+        .selectAll("circle")
+        .filter(function () {
+          return d3.select(this).attr("data-country") == country;
+        })
+        .style("fill", color)
+        .style("opacity", 0.8);
+    });
   });
 
   d3.select("#heat_country").on("mouseleave", function () {
