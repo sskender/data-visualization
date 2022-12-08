@@ -177,7 +177,7 @@ d3.csv(DATA_PATH, function (data) {
     .attr("width", x1.bandwidth())
     .attr("height", y1.bandwidth())
     .style("fill", function (d) {
-      return myColor(d.value);
+      return myColor(d.color);
     })
     .style("stroke-width", 4)
     .style("stroke", "none")
