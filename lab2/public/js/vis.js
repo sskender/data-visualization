@@ -8,6 +8,7 @@ var lastVariableVisited = "";
 var colorsOfLastVisited = [];
 var lastColorsVisited = "";
 var selectedCountry = "";
+var countryInScatter = "";
 
 // global colors
 
@@ -145,7 +146,7 @@ d3.csv(DATA_PATH, function (data) {
 
     tooltip.style("opacity", 1);
 
-    d3.select(this).style("stroke", "black").style("opacity", 1);
+    //d3.select(this).style("stroke", "black").style("opacity", 1);
 
     // store last variable in heatmap and colors of that variable
     lastVariableVisited = d.variable;
@@ -169,7 +170,7 @@ d3.csv(DATA_PATH, function (data) {
   var mouseleave = function (d) {
     d3.selectAll("#rektokvir").remove();
     tooltip.style("opacity", 0);
-    d3.select(this).style("stroke", "none").style("opacity", 0.8);
+    d3.select(this).style("stroke", "none").style("opacity", 1);
 
     // clear country
     var heatCountry = d3.select("#heat_country").property("value", "");
@@ -200,29 +201,60 @@ d3.csv(DATA_PATH, function (data) {
     .attr("ry", 4)
     .attr("width", x1.bandwidth())
     .attr("height", y1.bandwidth())
+    .attr("id", function (d) {
+      return `${d.group} - ${d.variable}`;
+    })
     .style("fill", function (d) {
       return myColor(d.color);
     })
     .style("stroke-width", 4)
     .style("stroke", "none")
-    .style("opacity", 0.8)
+    .style("opacity", 1)
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave);
 
-  d3.select("#country").on("change", function (e) {
-    // TODO
-    //const selectedCountry = d3.select("#country").property("value");
-    //console.log(`drzava na heatmapu: ${selectedCountry}`);
-    /*
-    var x_coordinate = this.x.animVal.value;
-    var y_coordinate = this.y.animVal.value;
-    var height_of_rect = this.height.animVal.value;
-    var width_of_rect = this.width.animVal.value;
+  d3.select("#scatter_country").on("mouseover", function () {
+    var scatterCountry = d3.select("#scatter_country").property("value");
+    // console.log(`country in heat received: ${scatterCountry}`);
+    // console.log(`current row is: ${lastVariableVisited}`);
 
-    verticalRect(x_coordinate, width_of_rect);
-    horizontalRect(y_coordinate, height_of_rect);
-    */
+    // find matching rect from scatter plot country and last variable
+    var [thisRect] = data.filter(
+      (alld) =>
+        alld.variable == lastVariableVisited && alld.group == scatterCountry
+    );
+    var thisX = x1(thisRect.group);
+    var thisY = y1(thisRect.variable);
+    var thisHeight = y1.bandwidth();
+
+    /// add horizontla frame
+    horizontalRect(thisY, thisHeight);
+
+    // find rect and add frame
+    d3.select("#heatmap_dataviz")
+      .selectAll("rect")
+      .filter(function () {
+        return (
+          d3.select(this).attr("x") == thisX &&
+          d3.select(this).attr("y") == thisY
+        );
+      })
+      .style("stroke", "black")
+      .style("stroke-width", 2)
+      .style("opacity", 1);
+  });
+
+  d3.select("#scatter_country").on("mouseleave", function () {
+    // remove horizontal frame
+    d3.selectAll("#rektokvir").remove();
+
+    // remove rect frame
+    d3.select("#heatmap_dataviz")
+      .selectAll("rect")
+      .style("stroke", "none")
+      .style("stroke-width", 0)
+      .style("opacity", 1);
   });
 });
 
@@ -256,9 +288,18 @@ d3.csv(DATA_PCA_PATH, function (data) {
   var mouseover = function (d) {
     const countryInput = d3.select("#country");
     countryInput.property("value", d.Country);
-    //console.log(countryInput)
-    countryInput.on("change")();
+
     tooltip2.style("opacity", 1);
+
+    d3.select(this)
+      .style("stroke-width", 4)
+      .style("stroke", "black")
+      .style("opacity", 1);
+
+    var scatterCountry = d3
+      .select("#scatter_country")
+      .property("value", d.Country);
+    scatterCountry.on("mouseover")();
   };
 
   var mousemove = function (d) {
@@ -272,8 +313,17 @@ d3.csv(DATA_PCA_PATH, function (data) {
   var mouseleave = function (d) {
     const countryInput = d3.select("#country");
     countryInput.property("value", "Australia");
-    countryInput.on("change")();
+
     tooltip2.transition().duration(200).style("opacity", 0);
+
+    d3.select(this)
+      .style("stroke-width", 0)
+      .style("stroke", "none")
+      .style("opacity", 1);
+
+    // remove scatter country
+    var scatterCountry = d3.select("#scatter_country").property("value", "");
+    scatterCountry.on("mouseleave")();
   };
 
   // Add dots
@@ -338,7 +388,7 @@ d3.csv(DATA_PCA_PATH, function (data) {
           return d3.select(this).attr("data-country") == country;
         })
         .style("fill", color)
-        .style("opacity", 0.8);
+        .style("opacity", 1);
     });
   });
 
