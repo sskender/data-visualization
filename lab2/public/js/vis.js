@@ -201,9 +201,6 @@ d3.csv(DATA_PATH, function (data) {
     .attr("ry", 4)
     .attr("width", x1.bandwidth())
     .attr("height", y1.bandwidth())
-    .attr("id", function (d) {
-      return `${d.group} - ${d.variable}`;
-    })
     .style("fill", function (d) {
       return myColor(d.color);
     })
